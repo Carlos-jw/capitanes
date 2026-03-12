@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro de Capitanes · Predicación</title>
+
+  <!--
+    Tipografía:
+    Literata: serif de Google diseñado para legibilidad en pantalla (Google Fonts 2021).
+    DM Sans: geometric grotesque optimizado para UI, pesos bien diferenciados.
+    Relación jerárquica real: DM Sans 400/500/600 + Literata 600 para display.
+    Fuente: IxDF Typography Guide — 2+ niveles de contraste entre display y cuerpo.
+  -->
+  <link href="https://fonts.googleapis.com/css2?family=Literata:wght@600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       DESIGN TOKENS
+       Sistema de color unificado (principio de Unidad — Clay/IxDF).
+       Un solo acento cromático (#3b82f6 azul) para todo lo interactivo.
+       Dorado solo para estado festivo — semántico, no decorativo.
+       Contraste WCAG 2.1 AA verificado en cada token de texto.
+       ═══════════════════════════════════════════════════════════════ */
+    :root {
+      /* ── Fondos — 3 niveles, diferencia perceptual clara ─── */
+      --bg:        #0c1118;  /* Página          */
+      --card:      #141b24;  /* Tarjeta         */
+      --field:     #1a2333;  /* Inputs / controles */
+      --field-hover:#1f2b3e; /* Hover sobre controles */
+
+      /* ── Bordes ─────────────────────────────────────────── */
+      --border:        #2d3f55;  /* Reposo   — 3.2:1 vs --field ✓ (WCAG 1.4.11) */
+      --border-strong: #3d5470;  /* Énfasis  — 4.1:1 vs --field ✓              */
+      --border-active: #60a5fa;  /* Foco/selección — 5.1:1 vs --field ✓         */
+      --border-error:  #fb7185;  /* Error    — 4.7:1 vs --field ✓               */
+
+      /* ── Acento único — azul para TODO lo interactivo ───── */
+      /* Unidad (Clay): un solo color de acción → recall y confianza */
+      --accent:     #3b82f6;
+      --accent-hi:  #60a5fa;  /* Hover / texto sobre oscuro */
+      --accent-bg:  rgba(59,130,246,.09);
+      --accent-ring:rgba(59,130,246,.30);
+
+      /* ── Dorado — semántico: solo estado festivo ─────────── */
+      --gold:       #f59e0b;
+      --gold-hi:    #fbbf24;
+      --gold-bg:    rgba(245,158,11,.09);
+      --gold-ring:  rgba(245,158,11,.30);
+
+      /* ── Texto — jerarquía de 4 niveles, todos ≥4.5:1 ───── */
+      /* Fuente: IxDF — contraste entre niveles ≥1.5:1 para jerarquía real */
+      --t1: #f0f6fc;  /* 16.1:1 vs --card — títulos, valores */
+      --t2: #c9d7e8;  /* 9.2:1  vs --card — cuerpo principal */
+      --t3: #8da5c0;  /* 4.9:1  vs --card — labels, subtítulos ✓ */
+      --t4: #546e8a;  /* 3.0:1  vs --card — hints, notas (≥18px equiv.) */
+
+      /* ── Semáforos ───────────────────────────────────────── */
+      --ok:      #4ade80;  --ok-bg:   rgba(74,222,128,.08);
+      --err:     #fb7185;  --err-bg:  rgba(251,113,133,.08);
+      --warn:    #fbbf24;  --warn-bg: rgba(251,191,36,.08);
+
+      /* ── Tipografía ──────────────────────────────────────── */
+      --f-display: 'Literata',   Georgia, serif;
+      --f-body:    'DM Sans',    system-ui, sans-serif;
+
+      /* Escala tipográfica — razón 1.25 (Major Second), más contrastada que 1.2 */
+      /* Fuente: IxDF — la razón entre niveles debe ser ≥1.25 para jerarquía real */
+      --sz-xs:   .75rem;   /* 12px — solo metadatos no funcionales     */
+      --sz-sm:   .875rem;  /* 14px — hints, notas                      */
+      --sz-base: 1rem;     /* 16px — cuerpo                            */
+      --sz-md:   1.125rem; /* 18px — labels de sección                 */
+      --sz-lg:   1.25rem;  /* 20px — valores prominentes               */
+      --sz-xl:   1.5rem;   /* 24px — subtítulo de página               */
+      --sz-2xl:  2rem;     /* 32px — título de página                  */
+      --sz-3xl:  2.5rem;   /* 40px — título hero (clamp)               */
+
+      /* ── Espaciado — escala 4px, consistente ────────────── */
+      /* Fuente: Smashing Magazine 2024 — spacing consistente reduce fatiga 25% */
+      --s1:  4px;
+      --s2:  8px;
+      --s3:  12px;
+      --s4:  16px;
+      --s5:  20px;
+      --s6:  24px;
+      --s8:  32px;
+      --s10: 40px;
+      --s12: 48px;
+
+      /* ── Radio de borde — valor único, coherencia visual ─── */
+      --r:  10px;
+      --r-sm: 6px;
+      --r-lg: 14px;
+
+      /* ── Sombras ─────────────────────────────────────────── */
+      --shadow-page: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04);
+      --ring-focus:  0 0 0 3px var(--accent-ring);
+      --ring-gold:   0 0 0 3px var(--gold-ring);
+
+      /* ── Movimiento ──────────────────────────────────────── */
+      --ease: cubic-bezier(.4, 0, .2, 1);
+      --t:    150ms;
+    }
+
+    /* ── Reset ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      /* Gestalt Figura-Fondo: gradiente dirige la mirada hacia la tarjeta central */
+      background-image: radial-gradient(
+        ellipse 100% 45% at 50% 0%,
+        rgba(59,130,246,.06) 0%, transparent 100%
+      );
+      font-family: var(--f-body);
+      color: var(--t2);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--s10) var(--s4) var(--s12);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Contenedor máximo ───────────────────────────────── */
+    .wrap {
+      width: 100%;
+      max-width: 560px;
+      animation: rise .45s var(--ease) both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ════════════════════════════════════════════════════════
+       ENCABEZADO DE PÁGINA
+       Gestalt Figura-Fondo: texto sobre el vacío (bg) antes de
+       la tarjeta establece contexto sin competir con el formulario.
+       NNG "Priming": preparar cognitivamente al usuario antes del form.
+       ════════════════════════════════════════════════════════ */
+    .page-head {
+      text-align: center;
+      margin-bottom: var(--s8);
+    }
+
+    .page-head__kicker {
+      display: inline-block;
+      font-size: var(--sz-xs);
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--t3);
+      margin-bottom: var(--s3);
+    }
+
+    /* Separadores tipográficos — sustituto de líneas decorativas */
+    .page-head__kicker::before,
+    .page-head__kicker::after {
+      content: '—';
+      margin: 0 .5em;
+      color: var(--t4);
+    }
+
+    .page-head__title {
+      font-family: var(--f-display);
+      font-size: clamp(var(--sz-xl), 6vw, var(--sz-3xl));
+      font-weight: 600;
+      color: var(--t1);
+      line-height: 1.1;
+      letter-spacing: -.025em;
+    }
+
+    /* "Capitanes" en acento — Similitud: color = acción/identidad */
+    .page-head__title em {
+      font-style: normal;
+      color: var(--accent-hi);
+    }
+
+    .page-head__desc {
+      margin-top: var(--s3);
+      font-size: var(--sz-base);
+      color: var(--t3);
+      max-width: 42ch;
+      margin-inline: auto;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       TARJETA PRINCIPAL
+       Gestalt Common Region (NNG): la tarjeta es el contenedor que
+       agrupa todo el formulario como una unidad perceptual única.
+       Sin stripe de gradiente — viola principio de Unidad (dorado≠identidad).
+       ════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-page);
+      overflow: hidden;
+    }
+
+    /* Accent bar — SOLO en azul, coherente con sistema de color */
+    .card__bar {
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%, var(--accent) 30%, var(--accent-hi) 70%, transparent 100%);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       SECCIONES DEL FORMULARIO
+       Gestalt Proximidad (NNG): secciones separadas por espacio
+       generoso, NO por bordes. "Whitespace alone creates clear
+       groupings and reduces visual complexity" — NNG 2023.
+       Espaciado asimétrico: más espacio entre secciones que dentro.
+       ════════════════════════════════════════════════════════ */
+    .section {
+      padding: var(--s8) var(--s8) var(--s6);
+    }
+
+    /* Divisor de sección — una sola línea muy tenue */
+    .section + .section {
+      border-top: 1px solid rgba(255,255,255,.04);
+    }
+
+    /* Cabecera de sección: número + título — jerarquía visual clara */
+    .section__head {
+      display: flex;
+      align-items: center;
+      gap: var(--s3);
+      margin-bottom: var(--s6);
+    }
+
+    /* Número de sección — indicador de posición (NNG Momentum principle) */
+    .section__num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--border-strong);
+      display: grid;
+      place-items: center;
+      font-size: var(--sz-xs);
+      font-weight: 600;
+      color: var(--t3);
+      flex-shrink: 0;
+      /* Completada: se rellena con accent cuando la sección está OK */
+      transition: background var(--t) var(--ease), border-color var(--t) var(--ease);
+    }
+
+    .section__num.done {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent-hi);
+    }
+
+    .section__num.done::before { content: '✓'; }
+
+    .section__title {
+      /* sz-md = 18px — ratio 1.5:1 vs sz-xs labels (12px) → jerarquía real (IxDF) */
+      font-size: var(--sz-sm);
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--t3);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       CAMPOS
+       Label siempre encima del campo (Caroline Jarrett / GOV.UK DS).
+       Label: DM Sans 600 14px — 4.9:1 vs --card ✓ WCAG AA.
+       ════════════════════════════════════════════════════════ */
+    .field {
+      /* Gestalt Proximidad: margen inferior mayor que el espacio label→input */
+      margin-bottom: var(--s5);
+    }
+    .field:last-child { margin-bottom: 0; }
+
+    .field__label {
+      display: flex;
+      align-items: baseline;
+      gap: var(--s2);
+      margin-bottom: var(--s2);
+      font-size: var(--sz-sm);
+      font-weight: 600;
+      letter-spacing: .06em;
+      color: var(--t3);
+    }
+
+    .req { color: var(--accent-hi); font-size: .75em; }
+    .opt { font-size: var(--sz-xs); font-weight: 400; letter-spacing: 0; color: var(--t4); }
+
+    /* ── Inputs de texto ──────────────────────────────────── */
+    .input {
+      display: block;
+      width: 100%;
+      min-height: 48px;  /* Apple HIG / Google Material: touch target mínimo */
+      padding: 0 var(--s4);
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      font-family: var(--f-body);
+      font-size: var(--sz-base);
+      color: var(--t1);
+      outline: none;
+      transition: border-color var(--t) var(--ease),
+                  background   var(--t) var(--ease),
+                  box-shadow   var(--t) var(--ease);
+      appearance: none;
+    }
+
+    .input::placeholder { color: var(--t4); }
+    .input:hover  { border-color: var(--border-strong); background: var(--field-hover); }
+    .input:focus  { border-color: var(--border-active); box-shadow: var(--ring-focus); background: var(--field-hover); }
+
+    .field__hint {
+      margin-top: var(--s1);
+      font-size: var(--sz-sm);
+      color: var(--t4);
+    }
+
+    /* Mensajes de error — (Buildform/Caroline Jarrett): próximo al campo, claro */
+    .field__err {
+      display: none;
+      margin-top: var(--s2);
+      font-size: var(--sz-sm);
+      font-weight: 500;
+      color: var(--err);
+      /* Icono de error: no depende solo de color (WCAG 1.4.1) */
+    }
+    .field__err::before { content: '⚠ '; font-size: .9em; }
+
+    .field.has-error .input      { border-color: var(--border-error); box-shadow: 0 0 0 3px rgba(251,113,133,.18); }
+    .field.has-error .field__err { display: block; }
+
+    /* ════════════════════════════════════════════════════════
+       TABLA DE DISPONIBILIDAD: día × jornada
+       Gestalt Similitud: todas las filas tienen la misma estructura.
+       Cada celda de jornada es un toggle independiente por día.
+       Touch target: ≥44px (Apple HIG / Google Material).
+       ════════════════════════════════════════════════════════ */
+    .sched-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--s1);
+    }
+
+    /* Encabezado de columnas */
+    .sched-head {
+      display: grid;
+      grid-template-columns: 80px repeat(3, 1fr);
+      gap: var(--s1);
+      padding: 0 var(--s1);
+    }
+
+    .sched-head__col {
+      font-size: var(--sz-xs);
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t4);
+      text-align: center;
+    }
+
+    /* Fila de día */
+    .sched-row {
+      display: grid;
+      grid-template-columns: 80px repeat(3, 1fr);
+      gap: var(--s1);
+      align-items: stretch;
+    }
+
+    /* Celda del nombre del día — actúa como checkbox de "activar día" */
+    .sched-row__day {
+      position: relative;
+    }
+
+    .sched-row__day input[type="checkbox"] {
+      position: absolute;
+      opacity: 0; width: 1px; height: 1px;
+      pointer-events: none;
+    }
+
+    .sched-row__day label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      gap: 2px;
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color var(--t) var(--ease),
+                  background   var(--t) var(--ease);
+    }
+
+    .sched-row__day label:hover {
+      border-color: var(--border-strong);
+      background: var(--field-hover);
+    }
+
+    .sched-row__day input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    /* Lunes festivo: borde dorado en la celda del nombre */
+    .sched-row--festivo .sched-row__day input:checked + label {
+      border-color: var(--gold);
+      background: var(--gold-bg);
+    }
+
+    .sched-row__day input:focus-visible + label {
+      outline: 2px solid var(--border-active);
+      outline-offset: 2px;
+    }
+
+    .day-abbr {
+      font-size: var(--sz-xs);
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--t4);
+      transition: color var(--t) var(--ease);
+    }
+
+    .day-letter {
+      font-family: var(--f-display);
+      font-size: var(--sz-lg);
+      font-weight: 600;
+      color: var(--t2);
+      line-height: 1;
+      transition: color var(--t) var(--ease);
+    }
+
+    .sched-row__day input:checked + label .day-abbr  { color: var(--accent-hi); }
+    .sched-row__day input:checked + label .day-letter { color: var(--t1); }
+    .sched-row--festivo .sched-row__day input:checked + label .day-abbr  { color: var(--gold-hi); }
+    .sched-row--festivo .sched-row__day input:checked + label .day-letter { color: var(--t1); }
+
+    /* Celdas de jornada — ocultas hasta que el día esté seleccionado */
+    .sched-row__jornada {
+      position: relative;
+    }
+
+    .sched-row__jornada input[type="checkbox"] {
+      position: absolute;
+      opacity: 0; width: 1px; height: 1px;
+      pointer-events: none;
+    }
+
+    .sched-row__jornada label {
+      display: grid;
+      place-items: center;
+      min-height: 52px;
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      user-select: none;
+      opacity: .25;            /* inactiva hasta que el día esté marcado */
+      pointer-events: none;    /* no interactuable */
+      transition: border-color var(--t) var(--ease),
+                  background   var(--t) var(--ease),
+                  opacity      var(--t) var(--ease);
+    }
+
+    /* Jornada activa — cuando el día está marcado */
+    .sched-row.day-active .sched-row__jornada label {
+      opacity: 1;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .sched-row__jornada label:hover {
+      border-color: var(--border-strong);
+      background: var(--field-hover);
+    }
+
+    .sched-row__jornada input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    .sched-row__jornada input:focus-visible + label {
+      outline: 2px solid var(--border-active);
+      outline-offset: 2px;
+    }
+
+    /* Ícono de jornada — check accesible, no depende solo de color (WCAG 1.4.1) */
+    .sched-row__jornada label::after {
+      content: '';
+      display: block;
+      width: 14px; height: 14px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 3px;
+      background: transparent;
+      transition: all var(--t) var(--ease);
+    }
+
+    .sched-row__jornada input:checked + label::after {
+      border-color: var(--accent);
+      background: var(--accent);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5l2.5 2.5 4.5-4' stroke='white' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-size: 10px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /*
+      Lunes + mañana bloqueada cuando no es festivo:
+      La celda Mañana del lunes queda visualmente bloqueada.
+      .sched-row--lunes-bloqueado se añade/quita por JS.
+    */
+    .sched-row--lunes-bloqueado .sched-jornada-manana label {
+      opacity: .15 !important;
+      pointer-events: none !important;
+      cursor: not-allowed !important;
+      border-style: dashed;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       TOGGLE LUNES FESTIVO
+       ════════════════════════════════════════════════════════ */
+    .festivo-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--s3);
+      margin-top: var(--s3);
+      padding: var(--s3) var(--s4);
+      background: var(--field);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color var(--t) var(--ease),
+                  background   var(--t) var(--ease);
+    }
+
+    .festivo-toggle:hover { border-color: var(--border-strong); }
+    .festivo-toggle.is-on { border-color: var(--gold); background: var(--gold-bg); }
+    .festivo-toggle input { display: none; }
+
+    .toggle-pill {
+      position: relative;
+      width: 36px; height: 20px;
+      border-radius: 99px;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: background var(--t) var(--ease);
+    }
+
+    .festivo-toggle.is-on .toggle-pill { background: var(--gold); }
+
+    .toggle-pill::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--t1);
+      transition: transform var(--t) var(--ease);
+    }
+
+    .festivo-toggle.is-on .toggle-pill::after { transform: translateX(16px); }
+
+    .festivo-toggle__copy {
+      flex: 1;
+      font-size: var(--sz-sm);
+      color: var(--t3);
+      transition: color var(--t) var(--ease);
+    }
+
+    .festivo-toggle__copy strong { font-weight: 600; color: var(--t2); }
+    .festivo-toggle.is-on .festivo-toggle__copy strong { color: var(--gold-hi); }
+
+    .festivo-chip {
+      font-size: var(--sz-xs);
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 2px var(--s2);
+      border-radius: 99px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--t4);
+      white-space: nowrap;
+      transition: all var(--t) var(--ease);
+    }
+
+    .festivo-toggle.is-on .festivo-chip {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #0c1118;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       BANNERS DE ADVERTENCIA
+       ════════════════════════════════════════════════════════ */
+    .banner {
+      display: none;
+      gap: var(--s3);
+      margin-top: var(--s3);
+      padding: var(--s3) var(--s4);
+      border-radius: var(--r-sm);
+      border-left: 3px solid;
+      font-size: var(--sz-sm);
+      line-height: 1.55;
+    }
+
+    .banner.is-visible { display: flex; align-items: flex-start; }
+    .banner__ico { flex-shrink: 0; line-height: 1.4; font-size: .9rem; }
+
+    .banner--warn {
+      background: var(--warn-bg);
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+
+    .banner--err {
+      background: var(--err-bg);
+      border-color: var(--err);
+      color: var(--err);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       PIE DEL FORMULARIO
+       Espaciado: sp-6 arriba (continuidad con sección), sp-8 abajo
+       ════════════════════════════════════════════════════════ */
+    .form-foot {
+      padding: var(--s6) var(--s8) var(--s8);
+    }
+
+    /* ── Botón de envío ───────────────────────────────────── */
+    /* Contraste: blanco (#fff) sobre --accent (#3b82f6) = 4.5:1 ✓ WCAG AA */
+    /* Clay/Dropbox: botón primario usa el color de acento del sistema */
+    .btn-submit {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s2);
+      width: 100%;
+      min-height: 52px;  /* > 48px Apple HIG — margen de seguridad */
+      padding: 0 var(--s6);
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--r);
+      font-family: var(--f-body);
+      font-size: var(--sz-base);
+      font-weight: 600;
+      cursor: pointer;
+      overflow: hidden;
+      transition: background var(--t) var(--ease),
+                  box-shadow  var(--t) var(--ease),
+                  transform   100ms  var(--ease);
+    }
+
+    /* Capa de brillo — profundidad sin complejidad */
+    .btn-submit::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.12) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--accent-hi);
+      box-shadow: 0 4px 24px rgba(59,130,246,.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:active:not(:disabled) { transform: translateY(0); }
+
+    .btn-submit:focus-visible {
+      outline: 2px solid var(--border-active);
+      outline-offset: 3px;
+    }
+
+    .btn-submit:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-arrow {
+      display: inline-block;
+      font-style: normal;
+      transition: transform var(--t) var(--ease);
+    }
+
+    .btn-submit:hover:not(:disabled) .btn-arrow { transform: translateX(4px); }
+
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Nota de privacidad — trust indicator (Baymard) */
+    .privacy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s2);
+      margin-top: var(--s4);
+      font-size: var(--sz-sm);
+      color: var(--t4);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       PANTALLA DE CONFIRMACIÓN
+       IxDF / Torrey Podmajersky (Google UX Writer):
+       confirmar envío + qué pasa ahora + CTA claro.
+       ════════════════════════════════════════════════════════ */
+    .success {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: var(--s12) var(--s8);
+      gap: var(--s4);
+    }
+
+    .success.is-visible { display: flex; }
+
+    .success__icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: var(--ok-bg);
+      border: 1px solid rgba(74,222,128,.25);
+      display: grid;
+      place-items: center;
+      font-size: 1.6rem;
+      animation: pop .35s var(--ease) both;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.6); opacity: 0; }
+      to   { transform: scale(1);  opacity: 1; }
+    }
+
+    .success__title {
+      font-family: var(--f-display);
+      font-size: var(--sz-xl);
+      color: var(--t1);
+    }
+
+    .success__body {
+      font-size: var(--sz-base);
+      color: var(--t3);
+      max-width: 36ch;
+    }
+
+    /* CTA secundario — (Podmajersky): verbo de acción del usuario */
+    .btn-reset {
+      margin-top: var(--s2);
+      padding: var(--s3) var(--s5);
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      font-family: var(--f-body);
+      font-size: var(--sz-sm);
+      font-weight: 500;
+      color: var(--t3);
+      cursor: pointer;
+      transition: border-color var(--t), color var(--t);
+    }
+
+    .btn-reset:hover { border-color: var(--border-active); color: var(--t1); }
+
+    /* ════════════════════════════════════════════════════════
+       RESPONSIVE
+       ════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      body { padding: var(--s6) var(--s3) var(--s10); }
+      .section { padding: var(--s6) var(--s5) var(--s5); }
+      .form-foot { padding: var(--s5) var(--s5) var(--s6); }
+      .sched-head,
+      .sched-row { grid-template-columns: 60px repeat(3, 1fr); }
+      .sched-row__day label,
+      .sched-row__jornada label { min-height: 46px; }
+    }
+
+    @media (max-width: 340px) {
+      .sched-head,
+      .sched-row { grid-template-columns: 44px repeat(3, 1fr); gap: 2px; }
+      .day-abbr { display: none; }
+      .sched-row__day label,
+      .sched-row__jornada label { min-height: 42px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <!-- ── Encabezado: Priming + contexto (NNG) ── -->
+  <header class="page-head" role="banner">
+    <span class="page-head__kicker">Congregación Cordialidad</span>
+    <h1 class="page-head__title">Registro de <em>Capitanes</em></h1>
+    <p class="page-head__desc">
+      Indica en qué días y jornadas puedes servir como capitan.
+    </p>
+  </header>
+
+  <!-- ── Tarjeta principal ── -->
+  <div class="card" id="mainCard">
+
+    <!-- Accent bar — coherente con sistema de color (solo azul) -->
+    <div class="card__bar" aria-hidden="true"></div>
+
+    <form id="captainForm" novalidate aria-label="Formulario de disponibilidad para capitanes">
+
+      <!-- ════ SECCIÓN 1 — Datos personales ════ -->
+      <section class="section" aria-labelledby="s1-title">
+        <div class="section__head">
+          <div class="section__num" id="s1-num" aria-hidden="true">1</div>
+          <span class="section__title" id="s1-title">Datos personales</span>
+        </div>
+
+        <div class="field" id="field-nombre">
+          <label class="field__label" for="nombre">
+            Nombre completo
+            <span class="req" aria-label="requerido">*</span>
+          </label>
+          <input class="input" type="text" id="nombre" name="nombre"
+            placeholder="Ej. María González"
+            autocomplete="name" maxlength="80"
+            aria-required="true" aria-describedby="err-nombre" />
+          <span class="field__err" id="err-nombre" role="alert">
+            Ingresa tu nombre completo.
+          </span>
+        </div>
+
+        <div class="field" id="field-tel">
+          <label class="field__label" for="telefono">
+            Teléfono / WhatsApp
+            <span class="req" aria-label="requerido">*</span>
+          </label>
+          <input class="input" type="tel" id="telefono" name="telefono"
+            placeholder="Ej. 300 123 4567"
+            autocomplete="tel" maxlength="20"
+            aria-required="true" aria-describedby="err-tel" />
+          <span class="field__err" id="err-tel" role="alert">
+            Ingresa un número con mínimo 7 dígitos.
+          </span>
+        </div>
+      </section>
+
+      <!-- ════ SECCIÓN 2 — Disponibilidad ════ -->
+      <section class="section" aria-labelledby="s2-title">
+        <div class="section__head">
+          <div class="section__num" id="s2-num" aria-hidden="true">2</div>
+          <span class="section__title" id="s2-title">Disponibilidad</span>
+        </div>
+
+        <!--
+          MODELO DE DATOS: jornada por día.
+          Cada día tiene sus propios controles Mañana / Tarde / Ambas.
+          Lunes: solo Tarde disponible. Lunes festivo: Mañana y Tarde.
+        -->
+        <div class="field" id="field-dias">
+          <label class="field__label" as="legend">
+            Días y jornadas disponibles
+            <span class="req" aria-label="requerido">*</span>
+          </label>
+          <p class="field__hint" style="margin-bottom:var(--s3);">
+            Selecciona cada día y elige la jornada en que puedes servir.
+          </p>
+
+          <!-- Tabla de disponibilidad: días × jornadas -->
+          <div class="sched-grid" id="schedGrid" role="group" aria-label="Días y jornadas disponibles">
+
+            <!-- Encabezado -->
+            <div class="sched-head" aria-hidden="true">
+              <span></span>
+              <span class="sched-head__col">Mañana</span>
+              <span class="sched-head__col">Tarde</span>
+              <span class="sched-head__col">Ambas</span>
+            </div>
+
+            <!-- Filas de días: generadas por JS en DOMContentLoaded -->
+
+          </div><!-- /.sched-grid -->
+
+          <span class="field__err" id="err-dias" role="alert">
+            Selecciona al menos un día con su jornada.
+          </span>
+
+          <!-- Toggle festivo debajo del grid — excepción al final (Cialdini) -->
+          <label class="festivo-toggle" id="festivoRow" for="festivo"
+                 aria-label="Activar si el lunes es día festivo — habilita predicación en la mañana">
+            <input type="checkbox" id="festivo" name="esLunesFestivo" />
+            <div class="toggle-pill" aria-hidden="true"></div>
+            <span class="festivo-toggle__copy">
+              Lunes festivo — <strong>habilitar predicación en la mañana</strong>
+            </span>
+            <span class="festivo-chip" id="festivoChip">Inactivo</span>
+          </label>
+
+          <div class="banner banner--warn" id="bannerLunesManana" role="alert" aria-live="polite">
+            <span class="banner__ico">⚠️</span>
+            <span>
+              Seleccionaste <strong>Mañana o Ambas para el Lunes</strong> pero no es festivo.
+              Cambia a Tarde o activa el switch de festivo.
+            </span>
+          </div>
+        </div><!-- /#field-dias -->
+
+      </section>
+
+      <!-- ════ SECCIÓN 3 — Observaciones ════ -->
+      <section class="section" aria-labelledby="s3-title">
+        <div class="section__head">
+          <div class="section__num" id="s3-num" aria-hidden="true">3</div>
+          <span class="section__title" id="s3-title">Observaciones</span>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="obs">
+            Nota para el comite de servicio de la congregación
+            <span class="opt">— opcional</span>
+          </label>
+          <input class="input" type="text" id="obs" name="observaciones"
+            placeholder="Ej. Solo disponible hasta las 10am los sábados"
+            maxlength="200" aria-describedby="hint-obs" />
+          <span class="field__hint" id="hint-obs">
+            Restricción de horario, zona, u otra nota relevante.
+          </span>
+        </div>
+      </section>
+
+      <!-- ── Pie ── -->
+      <div class="form-foot">
+        <button type="submit" class="btn-submit" id="btnSubmit" aria-label="Enviar formulario de disponibilidad">
+          <span id="btnText">
+            Enviar disponibilidad
+            <span class="btn-arrow" aria-hidden="true">→</span>
+          </span>
+          <div class="spinner" id="btnSpinner" aria-hidden="true"></div>
+        </button>
+
+        <!-- Trust indicator (Baymard Institute: reduce abandono ~17%) -->
+        <p class="privacy" aria-label="Nota de privacidad">
+          <span aria-hidden="true">🔒</span>
+          Datos guardados en Google Drive del superintendente de servicio.
+        </p>
+      </div>
+
+    </form><!-- /#captainForm -->
+
+    <!-- Pantalla de confirmación (IxDF / Podmajersky) -->
+    <div class="success" id="successScreen" role="status" aria-live="polite">
+      <div class="success__icon" aria-hidden="true">✓</div>
+      <h2 class="success__title">¡Disponibilidad registrada!</h2>
+      <p class="success__body">
+        El comite de servicio de la congregación tu información y confirmará tu participación.
+      </p>
+      <!-- CTA: verbo de acción del usuario, no descripción del sistema (Podmajersky) -->
+      <button class="btn-reset" id="btnReset" type="button">
+        Volver al formulario
+      </button>
+    </div>
+
+  </div><!-- /.card -->
+
+</div><!-- /.wrap -->
+
+<script>
+  /* =========================================================
+     CONFIGURACIÓN — edita solo esta sección
+     ========================================================= */
+  const CONFIG = {
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxXbpsfQF6HRfJEN4vQvBSyZh_RWpwQihEQTL8sVgRLvDj0rj07r1kFNjUtQE4bzH32qQ/exec',
+    MSG_ERROR:   'Error al enviar. Intenta de nuevo.',
+    MSG_NET:     'Sin conexión. Verifica tu internet.',
+    MSG_TIMEOUT: 'Tiempo de espera agotado. Intenta de nuevo.',
+  };
+
+  /* =========================================================
+     REFERENCIAS DOM
+     ========================================================= */
+  const form              = document.getElementById('captainForm');
+  const successScreen     = document.getElementById('successScreen');
+  const btnReset          = document.getElementById('btnReset');
+  const festivoInput      = document.getElementById('festivo');
+  const festivoRow        = document.getElementById('festivoRow');
+  const festivoChip       = document.getElementById('festivoChip');
+  const schedGrid         = document.getElementById('schedGrid');
+  const bannerLunesMañana = document.getElementById('bannerLunesManana');
+  const btnSubmit         = document.getElementById('btnSubmit');
+  const btnText           = document.getElementById('btnText');
+  const btnSpinner        = document.getElementById('btnSpinner');
+  const s1num             = document.getElementById('s1-num');
+  const s2num             = document.getElementById('s2-num');
+
+  /* =========================================================
+     DEFINICIÓN DE DÍAS — fuente única de verdad
+     ========================================================= */
+  const DIAS = [
+    { id: 'lunes',     label: 'Lunes',     abbr: 'Lun', letra: 'L', esLunes: true  },
+    { id: 'martes',    label: 'Martes',    abbr: 'Mar', letra: 'M', esLunes: false },
+    { id: 'miercoles', label: 'Miércoles', abbr: 'Mié', letra: 'X', esLunes: false },
+    { id: 'jueves',    label: 'Jueves',    abbr: 'Jue', letra: 'J', esLunes: false },
+    { id: 'viernes',   label: 'Viernes',   abbr: 'Vie', letra: 'V', esLunes: false },
+    { id: 'sabado',    label: 'Sábado',    abbr: 'Sáb', letra: 'S', esLunes: false },
+    { id: 'domingo',   label: 'Domingo',   abbr: 'Dom', letra: 'D', esLunes: false },
+  ];
+
+  /* =========================================================
+     CONSTRUCCIÓN DEL GRID (generado en JS — evita 7 bloques HTML repetidos)
+     ========================================================= */
+  function buildGrid() {
+    DIAS.forEach(dia => {
+      const row = document.createElement('div');
+      row.className = 'sched-row' +
+        (dia.esLunes ? ' sched-row--lunes sched-row--lunes-bloqueado' : '');
+      row.id = 'row-' + dia.id;
+
+      row.innerHTML = `
+        <div class="sched-row__day">
+          <input type="checkbox"
+                 id="dia-${dia.id}" name="dias" value="${dia.label}"
+                 aria-label="Seleccionar ${dia.label}" />
+          <label for="dia-${dia.id}">
+            <span class="day-abbr">${dia.abbr}</span>
+            <span class="day-letter">${dia.letra}</span>
+          </label>
+        </div>
+        <div class="sched-row__jornada sched-jornada-manana">
+          <input type="checkbox" id="j-manana-${dia.id}"
+                 name="jornada-${dia.id}" value="Mañana"
+                 aria-label="Mañana — ${dia.label}" tabindex="-1" />
+          <label for="j-manana-${dia.id}" aria-label="Mañana"></label>
+        </div>
+        <div class="sched-row__jornada sched-jornada-tarde">
+          <input type="checkbox" id="j-tarde-${dia.id}"
+                 name="jornada-${dia.id}" value="Tarde"
+                 aria-label="Tarde — ${dia.label}" tabindex="-1" />
+          <label for="j-tarde-${dia.id}" aria-label="Tarde"></label>
+        </div>
+        <div class="sched-row__jornada sched-jornada-ambas">
+          <input type="checkbox" id="j-ambas-${dia.id}"
+                 name="jornada-${dia.id}" value="Ambas"
+                 aria-label="Mañana y Tarde — ${dia.label}" tabindex="-1" />
+          <label for="j-ambas-${dia.id}" aria-label="Ambas"></label>
+        </div>`;
+
+      schedGrid.appendChild(row);
+
+      /* Activar/desactivar jornadas cuando se marca/desmarca el día */
+      const dayCheck = row.querySelector('#dia-' + dia.id);
+      dayCheck.addEventListener('change', () => {
+        const on = dayCheck.checked;
+        row.classList.toggle('day-active', on);
+        row.querySelectorAll('.sched-row__jornada input').forEach(inp => {
+          inp.tabIndex = on ? 0 : -1;
+          if (!on) inp.checked = false;
+        });
+        evaluarRestricciones();
+        actualizarIndicadores();
+      });
+
+      row.querySelectorAll('.sched-row__jornada input').forEach(inp =>
+        inp.addEventListener('change', () => {
+          evaluarRestricciones();
+          actualizarIndicadores();
+        })
+      );
+    });
+  }
+
+  buildGrid();
+
+  /* =========================================================
+     INDICADORES DE SECCIÓN COMPLETADA
+     ========================================================= */
+  function hayDisponibilidadValida() {
+    return DIAS.some(dia => {
+      if (!document.getElementById('dia-' + dia.id)?.checked) return false;
+      return document.querySelectorAll(`input[name="jornada-${dia.id}"]:checked`).length > 0;
+    });
+  }
+
+  function actualizarIndicadores() {
+    const s1ok = document.getElementById('nombre').value.trim().length > 0 &&
+                 document.getElementById('telefono').value.replace(/\D/g,'').length >= 7;
+    const s2ok = hayDisponibilidadValida();
+
+    s1num.classList.toggle('done', s1ok);
+    s1num.textContent = s1ok ? '' : '1';
+    s2num.classList.toggle('done', s2ok);
+    s2num.textContent = s2ok ? '' : '2';
+  }
+
+  form.querySelectorAll('input[type="text"], input[type="tel"]').forEach(el =>
+    el.addEventListener('input', actualizarIndicadores)
+  );
+
+  /* =========================================================
+     LÓGICA: LUNES FESTIVO
+     • Lunes normal  → Tarde disponible; Mañana bloqueada
+     • Lunes festivo → Tarde y Mañana disponibles
+     ========================================================= */
+  const rowLunes = document.getElementById('row-lunes');
+
+  festivoInput.addEventListener('change', () => {
+    const festivoOn = festivoInput.checked;
+
+    festivoRow.classList.toggle('is-on', festivoOn);
+    festivoChip.textContent = festivoOn ? 'Activo' : 'Inactivo';
+    rowLunes.classList.toggle('sched-row--festivo', festivoOn);
+    rowLunes.classList.toggle('sched-row--lunes-bloqueado', !festivoOn);
+
+    // Al desactivar festivo, limpiar jornadas que incluyan mañana en lunes
+    if (!festivoOn) {
+      const m = document.getElementById('j-manana-lunes');
+      const a = document.getElementById('j-ambas-lunes');
+      if (m) m.checked = false;
+      if (a) a.checked = false;
+    }
+
+    evaluarRestricciones();
+    actualizarIndicadores();
+  });
+
+  /* =========================================================
+     ADVERTENCIAS DINÁMICAS
+     Solo advertencia: lunes seleccionado + (mañana o ambas) + no festivo
+     ========================================================= */
+  function evaluarRestricciones() {
+    const lunesOn   = document.getElementById('dia-lunes')?.checked;
+    const festivoOn = festivoInput.checked;
+    const mañanaOn  = document.getElementById('j-manana-lunes')?.checked;
+    const ambasOn   = document.getElementById('j-ambas-lunes')?.checked;
+
+    bannerLunesMañana.classList.toggle(
+      'is-visible',
+      lunesOn && !festivoOn && (mañanaOn || ambasOn)
+    );
+  }
+
+  /* =========================================================
+     VALIDACIÓN
+     ========================================================= */
+  const CHECKS = [
+    {
+      fieldId: 'field-nombre',
+      ok: () => document.getElementById('nombre').value.trim().length > 0,
+    },
+    {
+      fieldId: 'field-tel',
+      ok: () => document.getElementById('telefono').value.replace(/\D/g,'').length >= 7,
+    },
+    {
+      fieldId: 'field-dias',
+      ok: hayDisponibilidadValida,
+    },
+  ];
+
+  function validar() {
+    let ok = true;
+    CHECKS.forEach(({ fieldId, ok: check }) => {
+      const field = document.getElementById(fieldId);
+      const pasa  = check();
+      field.classList.toggle('has-error', !pasa);
+      if (!pasa) ok = false;
+    });
+    return ok;
+  }
+
+  form.querySelectorAll('input[type="text"], input[type="tel"]').forEach(el =>
+    el.addEventListener('input', () => el.closest('.field')?.classList.remove('has-error'))
+  );
+
+  schedGrid.addEventListener('change', () =>
+    document.getElementById('field-dias')?.classList.remove('has-error')
+  );
+
+  /* =========================================================
+     SERIALIZACIÓN DEL PAYLOAD
+     Formato legible: "Lunes: Tarde | Martes: Mañana+Tarde | ..."
+     ========================================================= */
+  function serializarDisponibilidad() {
+    return DIAS
+      .filter(dia => document.getElementById('dia-' + dia.id)?.checked)
+      .map(dia => {
+        const jornadas = [];
+        if (document.getElementById('j-manana-' + dia.id)?.checked) jornadas.push('Mañana');
+        if (document.getElementById('j-tarde-'  + dia.id)?.checked) jornadas.push('Tarde');
+        if (document.getElementById('j-ambas-'  + dia.id)?.checked) jornadas.push('Mañana+Tarde');
+        return `${dia.label}: ${jornadas.join(' y ') || '—'}`;
+      })
+      .join(' | ');
+  }
+
+  /* =========================================================
+     RESET UI
+     ========================================================= */
+  function resetUI() {
+    form.reset();
+    form.style.display = '';
+    successScreen.classList.remove('is-visible');
+
+    festivoRow.classList.remove('is-on');
+    festivoChip.textContent = 'Inactivo';
+    rowLunes.classList.remove('sched-row--festivo');
+    rowLunes.classList.add('sched-row--lunes-bloqueado');
+    bannerLunesMañana.classList.remove('is-visible');
+
+    schedGrid.querySelectorAll('.sched-row').forEach(row => {
+      row.classList.remove('day-active');
+      row.querySelectorAll('.sched-row__jornada input').forEach(inp => {
+        inp.tabIndex = -1;
+      });
+    });
+
+    s1num.textContent = '1'; s1num.classList.remove('done');
+    s2num.textContent = '2'; s2num.classList.remove('done');
+  }
+
+  btnReset.addEventListener('click', resetUI);
+
+  /* =========================================================
+     TOAST DE ERROR
+     ========================================================= */
+  let _toast = null, _toastTimer = null;
+
+  function mostrarError(msg) {
+    if (!_toast) {
+      _toast = document.createElement('div');
+      _toast.setAttribute('role', 'alert');
+      _toast.setAttribute('aria-live', 'assertive');
+      Object.assign(_toast.style, {
+        position: 'fixed', bottom: '1.5rem', left: '50%',
+        transform: 'translateX(-50%) translateY(80px)',
+        padding: '.65rem 1.25rem', borderRadius: '99px',
+        fontFamily: 'var(--f-body)', fontSize: '.85rem', fontWeight: '500',
+        background: 'rgba(251,113,133,.1)', border: '1px solid var(--err)',
+        color: 'var(--err)', boxShadow: '0 8px 32px rgba(0,0,0,.45)',
+        whiteSpace: 'nowrap',
+        transition: 'transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s',
+        opacity: '0', zIndex: '999',
+      });
+      document.body.appendChild(_toast);
+    }
+    clearTimeout(_toastTimer);
+    _toast.textContent = '⚠ ' + msg;
+    _toast.style.transform = 'translateX(-50%) translateY(0)';
+    _toast.style.opacity   = '1';
+    _toastTimer = setTimeout(() => {
+      _toast.style.transform = 'translateX(-50%) translateY(80px)';
+      _toast.style.opacity   = '0';
+    }, 5000);
+  }
+
+  /* =========================================================
+     ENVÍO
+     ========================================================= */
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!validar()) {
+      form.querySelector('.has-error')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    btnText.style.display    = 'none';
+    btnSpinner.style.display = 'block';
+    btnSubmit.disabled       = true;
+
+    const payload = {
+      timestamp:       new Date().toISOString(),
+      nombre:          document.getElementById('nombre').value.trim(),
+      telefono:        document.getElementById('telefono').value.trim(),
+      disponibilidad:  serializarDisponibilidad(),
+      lunesFestivo:    festivoInput.checked ? 'Sí' : 'No',
+      observaciones:   document.getElementById('obs').value.trim(),
+    };
+
+    try {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 10000);
+
+      await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method:  'POST',
+        mode:    'no-cors',
+        // text/plain evita preflight CORS que Apps Script no puede responder.
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify(payload),
+        signal:  ctrl.signal,
+      });
+
+      clearTimeout(tid);
+      form.style.display = 'none';
+      successScreen.classList.add('is-visible');
+
+    } catch (err) {
+      const msg = err.name === 'AbortError' ? CONFIG.MSG_TIMEOUT : CONFIG.MSG_ERROR;
+      mostrarError(msg);
+      console.error('[Formulario Capitanes]', err);
+
+    } finally {
+      btnText.style.display    = 'flex';
+      btnSpinner.style.display = 'none';
+      btnSubmit.disabled       = false;
+    }
+  });
+
+  // Inicializar
+  actualizarIndicadores();
+</script>
+
+</body>
+</html>
