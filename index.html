@@ -129,7 +129,7 @@
         </div>
         <div class="field" id="field-nombre">
           <label class="field__label" for="nombre">Nombre completo <span class="req" aria-label="requerido">*</span></label>
-          <input class="input" type="text" id="nombre" name="nombre" placeholder="Ej. María González" autocomplete="name" maxlength="80" aria-required="true" aria-describedby="err-nombre" />
+          <input class="input" type="text" id="nombre" name="nombre" placeholder="Ej. Carlos González" autocomplete="name" maxlength="80" aria-required="true" aria-describedby="err-nombre" />
           <span class="field__err" id="err-nombre" role="alert">Ingresa tu nombre completo.</span>
         </div>
         <div class="field" id="field-tel">
@@ -147,6 +147,12 @@
         <div class="field" id="field-dias">
           <label class="field__label" as="legend">Días y jornadas disponibles <span class="req" aria-label="requerido">*</span></label>
           <p class="field__hint" style="margin-bottom:var(--s3);">Selecciona cada día y elige la jornada en que puedes servir.</p>
+          <label class="festivo-toggle" id="festivoRow" for="festivo" aria-label="Activar si el lunes es día festivo" style="margin-bottom:var(--s3);">
+            <input type="checkbox" id="festivo" name="esLunesFestivo" />
+            <div class="toggle-pill" aria-hidden="true"></div>
+            <span class="festivo-toggle__copy">Lunes festivo &mdash; <strong>habilitar predicación en la mañana</strong></span>
+            <span class="festivo-chip" id="festivoChip">Inactivo</span>
+          </label>
           <div class="sched-grid" id="schedGrid" role="group" aria-label="Días y jornadas disponibles">
             <div class="sched-head" aria-hidden="true">
               <span></span>
@@ -156,12 +162,6 @@
             </div>
           </div>
           <span class="field__err" id="err-dias" role="alert">Selecciona al menos un día con su jornada.</span>
-          <label class="festivo-toggle" id="festivoRow" for="festivo" aria-label="Activar si el lunes es día festivo">
-            <input type="checkbox" id="festivo" name="esLunesFestivo" />
-            <div class="toggle-pill" aria-hidden="true"></div>
-            <span class="festivo-toggle__copy">Lunes festivo — <strong>habilitar predicación en la mañana</strong></span>
-            <span class="festivo-chip" id="festivoChip">Inactivo</span>
-          </label>
           <div class="banner banner--warn" id="bannerLunesManana" role="alert" aria-live="polite">
             <span class="banner__ico">⚠️</span>
             <span>Seleccionaste <strong>Mañana o Ambas para el Lunes</strong> pero no es festivo. Cambia a Tarde o activa el switch de festivo.</span>
